@@ -9,6 +9,7 @@ void Hand::clearHand(){
     for(int i = 0; i < 5; ++i){
         cards[i] = 0;
         values[i] = 0;
+        sortedValues[i] = 0;
         highCards[i] = 0;
     }
 }
@@ -16,24 +17,28 @@ void Hand::sortHand(){
     std::sort(cards.begin(), cards.end());
 }
 void Hand::sortValues(){
-    std::sort(values.rbegin(), values.rend()); //sort values descending
+    std::sort(sortedValues.rbegin(), sortedValues.rend()); //sort values descending
 }
 void Hand::cardValuesAndSuits(){
     for(int i = 0; i < 5; i++){
         if(cards[i] >= 2 && cards[i] <= 14){
             values[i] = cards[i];
+            sortedValues[i] = values[i];
             suits[i] = "s";
         }
         if(cards[i] >= 15 && cards[i] <= 27){
             values[i] = cards[i] - 13;
+            sortedValues[i] = values[i];
             suits[i] = "h";
         }
         if(cards[i] >= 28 && cards[i] <= 40){
             values[i] = cards[i] - 26;
+            sortedValues[i] = values[i];
             suits[i] = "d";
         }
         if(cards[i] >= 41 && cards[i] <= 53){
             values[i] = cards[i] - 39;
+            sortedValues[i] = values[i];
             suits[i] = "c";
         }
         if(values[i] == 10){
@@ -67,18 +72,18 @@ void Hand::printHand(){
 void Hand::handValue(){
     //flush and straigh flush
     if(suits[0] == suits[4]){
-        if(values[0] - values[4] == 4){
-            highCards[0] = values[0];
+        if(sortedValues[0] - sortedValues[4] == 4){
+            highCards[0] = sortedValues[0];
             value = 8; //straight flush
             return;
         }
-        if(values[0] == 14 && values[1] == 5){
+        if(sortedValues[0] == 14 && sortedValues[1] == 5){
             highCards[0] = 5;
             value = 8; //straight flush
             return;
         }
         for(int i = 0; i < 5; i++){
-            highCards[i] = values[i];
+            highCards[i] = sortedValues[i];
         }
         value = 5; //flush
         return;
@@ -86,24 +91,24 @@ void Hand::handValue(){
     //pairs, two pairs, trips, full houses and quads
     int pairs = 0;
     for(int i = 1; i < 5; i++){
-        if(values[i] == values[i - 1]){
+        if(sortedValues[i] == sortedValues[i - 1]){
             ++pairs;
         }
     }
     //straight or high card
     if(pairs == 0){
-        if(values[0] - values[4] == 4){
-            highCards[0] = values[0];
+        if(sortedValues[0] - sortedValues[4] == 4){
+            highCards[0] = sortedValues[0];
             value = 4; //straight
             return;
         }
-        if(values[4] == 14 && values[3] == 5){
+        if(sortedValues[4] == 14 && sortedValues[3] == 5){
             highCards[0] = 5;
             value = 4; //straight
             return;
         }
         for(int i = 0; i < 5; i++){
-            highCards[i] = values[i];
+            highCards[i] = sortedValues[i];
         }
         value = 0; //high card
         return;
@@ -111,11 +116,11 @@ void Hand::handValue(){
     //one pair
     if(pairs == 1){
         for(int i = 1; i < 5; i++){
-            if(values[i] == values[i - 1]){
-                highCards[0] = values[i];
+            if(sortedValues[i] == sortedValues[i - 1]){
+                highCards[0] = sortedValues[i];
             }
             else{
-                highCards[i] = values[i - 1];
+                highCards[i] = sortedValues[i - 1];
             }
         }
         value = 1; //one pair
@@ -123,29 +128,29 @@ void Hand::handValue(){
     }
     //two pairs or trips
     if(pairs == 2){
-        if(values[0] == values[2] || values[1] == values[3] || values[2] == values[4]){
-            highCards[0] = values[2];
+        if(sortedValues[0] == sortedValues[2] || sortedValues[1] == sortedValues[3] || sortedValues[2] == sortedValues[4]){
+            highCards[0] = sortedValues[2];
             value = 3; //trips
             return;
         }
-        highCards[0] = values[1];
-        highCards[1] = values[3];
-        if(values[0] != values[1]){
-            highCards[2] = values[0];
+        highCards[0] = sortedValues[1];
+        highCards[1] = sortedValues[3];
+        if(sortedValues[0] != sortedValues[1]){
+            highCards[2] = sortedValues[0];
         }
-        else if(values[1] != values[2]){
-            highCards[2] = values[2];
+        else if(sortedValues[1] != sortedValues[2]){
+            highCards[2] = sortedValues[2];
         }
-        else if(values[3] != values[4]){
-            highCards[2] = values[4];
+        else if(sortedValues[3] != sortedValues[4]){
+            highCards[2] = sortedValues[4];
         }
         value = 2; //two pairs
         return;
     }
     //full house or quads
     if(pairs == 3){
-        highCards[0] = values[2];
-        if(values[0] == values[3] || values[1] == values[4]){
+        highCards[0] = sortedValues[2];
+        if(sortedValues[0] == sortedValues[3] || sortedValues[1] == sortedValues[4]){
             value = 7; //quads
             return;
         }
@@ -155,57 +160,56 @@ void Hand::handValue(){
 }
 std::string Hand::getDiscards(){
     std::string discards = "";
-    if(value == 3){
+    if(value == 3){ //trips
         for(int i = 0; i < 5; i++){
-            if(cards[i] != values[2] || cards[i] != values[2] + 13 
-            || cards[i] != values[2] + 26 || cards[i] != values[2] + 39){
+            if(values[i] != highCards[0]){
                 discards = discards + std::to_string(i + 1);
             }
         }
     }
-    if(value == 2){
+    if(value == 2){ //two pairs
         for(int i = 0; i < 5; i++){
-            if((cards[i] != values[1] && cards[i] != values[3]) || 
-            (cards[i] != values[1] + 13 && cards[i] != values[3] + 13) ||
-            (cards[i] != values[1] + 26 && cards[i] != values[3] + 26) ||
-            (cards[i] != values[1] + 39 && cards[i] != values[3] + 39)) {
+            if((values[i] != highCards[0] && values[i] != highCards[1])) {
                 discards = discards + std::to_string(i + 1);
             }
         }
     }
-    if(value == 1){
+    if(value == 1){ //one pair
         for(int i = 0; i < 5; i++){
-            if(cards[i] != highCards[0] && cards[i] != highCards[0] + 13 &&
-            cards[i] != highCards[0] + 26 && cards[i] != highCards[0] + 39){
+            if(values[i] != highCards[0]){
                 discards = discards + std::to_string(i + 1);
             }
         }
     }
-    if(value == 0){
-        if(suits[0] == suits[3]){
+    if(value == 0){ //high card
+        if(suits[0] == suits[3]){ //4 to flush
             discards = "5";
         }
-        else if(suits[1] == suits[4]){
+        else if(suits[1] == suits[4]){ //4 to flush
             discards = "1";
         }
-        else if(values[4] - values[1] == 3){
+        else if(sortedValues[4] - sortedValues[1] == 3){ //4 to straight
             for(int i = 0; i < 5; i++){
-                if(cards[i] == values[0] || cards[i] == values[0] + 13 || cards[i] == values[0] + 26 || cards[i] == values[0] + 39){
+                if(values[i] == sortedValues[0]){
                     discards = std::to_string(i + 1);
+                    break;
                 }
             }
         }
-        else if(values[3] - values[0] == 3){
+        else if(sortedValues[3] - sortedValues[0] == 3){ //4 to straight
             for(int i = 0; i < 5; i++){
-                if(cards[i] == values[4] || cards[i] == values[4] + 13 || cards[i] == values[4] + 26 || cards[i] == values[4] + 39){
+                if(values[i] == sortedValues[4]){
                     discards = std::to_string(i + 1);
+                    break;
                 }
             }
         }
-        else{
+        else{ //no good draws
+            if(highCards[0] < 10){
+                return "12345";
+            }
             for(int i = 0; i < 5; i++){
-                if(cards[i] != highCards[0] && cards[i] != highCards[0] + 13 &&
-                cards[i] != highCards[0] + 26 && cards[i] != highCards[0] + 39){
+                if(values[i] != highCards[0]){
                     discards = discards + std::to_string(i + 1);
                 }
             }
@@ -242,5 +246,4 @@ void getWinner(Hand& playerHand, Hand& computerHand){
     else{
         std::cout << "It's a tie!\n";
     }
-
 }

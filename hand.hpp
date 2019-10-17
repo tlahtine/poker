@@ -12,6 +12,7 @@ struct Hand{
     std::string getDiscards();
     std::array<int, 5> cards;
     std::array<int, 5> values;
+    std::array<int, 5> sortedValues;
     std::array<std::string, 5> suits;
     std::array<std::string, 5> cardNames;
     int value = 0;
