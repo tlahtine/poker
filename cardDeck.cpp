@@ -1,51 +1,54 @@
 #include "cardDeck.hpp"
 #include <iostream>
-#include <array>
+#include <bits/stdc++.h> 
 #include <string>
 #include <cstring>
 #include <algorithm>
 #include <random>
 #include <chrono>
-void CardDeck::newDeck(){
-    for(int i = 2; i <= 53; i++){
-        cards[i - 2] = i;
-    }
-}
 void CardDeck::shuffleDeck(){
+    cards.clear();
+    std::array<std::string, 4> suit = {"s", "h", "d", "c"};
+    for(int j = 0; j < 4; ++j){
+        for(int i = 2; i <= 14; ++i){
+            cards.emplace_back(i, suit[j]);
+        }
+    }
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     shuffle (cards.begin(), cards.end(), std::default_random_engine(seed));
 }
 void CardDeck::dealHand(Hand& hand){
-    int count = 0;
-    for(int i = 0; count < 5; i++){
-        if(cards[i] != 0){
-            hand.cards[count] = cards[i];
-            cards[i] = 0;
-            count++;
-        }
+    hand.clearHand();
+    for(int i = 0; i < 5; ++i){
+        hand.cards.emplace_back(cards[i]);
     }
+    cards.erase(cards.begin(), cards.begin() + 5);
     hand.sortHand();
-    hand.cardValuesAndSuits();
-    hand.sortValues();
     hand.handValue();
+    hand.setHand();
 }
-void CardDeck::drawCards(Hand& hand, std::string discards){
-    int cardCount = discards.size();
-    int * card;
-    card = new (std::nothrow) int[cardCount];
-    for(int i = 0; i < cardCount; i++){
-        card[i] = int(discards[i]) - 48;
-        for(int j = 0; j < 52; j++){
-            if(cards[j] != 0){
-                hand.cards[card[i] - 1] = cards[j];
-                cards[j] = 0;
-                break;
-            }
+void CardDeck::drawCards(Hand& hand, std::string str){
+    std::set<int> setDiscards;
+    std::vector<int> discards;
+    for(int i = 0; i < str.size(); ++i){
+        int d = int(str[i] - 48);
+        if(d >= 1 && d <= 5){
+            setDiscards.insert(d);
         }
     }
+    for(int i : setDiscards){
+        discards.emplace_back(i);
+    }
+    std::sort(discards.rbegin(), discards.rend());
+    for(int i : discards){
+        hand.cards.erase(hand.cards.begin() + (i - 1));
+    }
+    for(int i = 0; i < discards.size(); ++i){
+        hand.cards.emplace_back(cards[i]);
+    }
+    cards.erase(cards.begin(), cards.begin() + discards.size());
     hand.sortHand();
-    hand.cardValuesAndSuits();
-    hand.sortValues();
     hand.handValue();
+    hand.setHand();
 
 }
