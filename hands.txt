@@ -1,8 +1,0 @@
-Teemu: Qc 8s 8h 7s 2c Pair
-Computer: Tc 9c 7d 4c 2d High card
-Teemu: As Ac Th 7h 2c Pair
-Computer: Ah Qs Qd Jh 9h Pair
-Teemu: Qs Qc 4d 4c 3c Two pairs
-Computer: 8h 6s 6d 3d 2s Pair
-Teemu: Kc Td Tc 9s 5s Pair
-Computer: Ks 9d 8s 5h 2h High card
